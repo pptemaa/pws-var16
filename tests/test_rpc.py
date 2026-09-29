@@ -45,38 +45,36 @@ class ProtocolTests(unittest.TestCase):
 class RpcTests(unittest.TestCase):
     """Вызов функций модели через настоящий TCP-сервер."""
 
-    @classmethod
-    def setUpClass(cls):
+    def set_up(self):
         """Запустить сервер на свободном порту и настроить журнал."""
-        cls.journal_dir = tempfile.TemporaryDirectory()
-        cls.journal = os.path.join(cls.journal_dir.name, "journal.log")
-        server.setup_journal(cls.journal)
-        cls.server = server.RpcServer(("127.0.0.1", 0), server.RpcHandler)
-        cls.address = cls.server.server_address
-        threading.Thread(target=cls.server.serve_forever,
-                         daemon=True).start()
+        self.journal_dir = tempfile.TemporaryDirectory()
+        self.journal = os.path.join(self.journal_dir.name, "journal.log")
+        server.setup_journal(self.journal)
+        self.server = server.RpcServer(("127.0.0.1", 0), server.RpcHandler)
+        self.address = self.server.server_address
+        self.thread = threading.Thread(
+            target=self.server.serve_forever,
+            daemon=True,
+        )
+        self.thread.start()
+        model.reset()
+        self.client = client.RpcClient(*self.address)
+        self.addCleanup(self.tear_down)
 
-    @classmethod
-    def tearDownClass(cls):
+    def tear_down(self):
         """Остановить сервер и закрыть журнал."""
-        cls.server.shutdown()
-        cls.server.server_close()
+        self.client.close()
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join()
         for handler in list(server.logger.handlers):
             handler.close()
             server.logger.removeHandler(handler)
-        cls.journal_dir.cleanup()
-
-    def setUp(self):
-        """Очистить модель и подключить клиента."""
-        model.reset()
-        self.client = client.RpcClient(*self.address)
-
-    def tearDown(self):
-        """Отключить клиента."""
-        self.client.close()
+        self.journal_dir.cleanup()
 
     def test_all_functions(self):
         """Все 10 функций модели доступны удалённо."""
+        self.set_up()
         rpc = self.client
         agent = rpc.create_agent("linux", time=NOW)
         self.assertEqual(agent, {"key": 1, "time": NOW, "platform": "linux"})
@@ -93,6 +91,7 @@ class RpcTests(unittest.TestCase):
 
     def test_errors(self):
         """Ошибки модели передаются клиенту с исходным типом."""
+        self.set_up()
         with self.assertRaises(KeyError):
             self.client.get_agent(1)
         with self.assertRaises(TypeError):
@@ -103,6 +102,7 @@ class RpcTests(unittest.TestCase):
 
     def test_bad_requests(self):
         """Неизвестный код, не-объект и не-JSON дают ответ с ошибкой."""
+        self.set_up()
         with socket.create_connection(self.address) as sock:
             for request in (protocol.encode_request(99, {}),
                             protocol.encode_request(1, [1]),
@@ -114,6 +114,7 @@ class RpcTests(unittest.TestCase):
 
     def test_journal(self):
         """Ответы сервера записываются в журнал."""
+        self.set_up()
         self.client.create_agent("journal-check")
         self.client.get_agents()
         with open(self.journal, encoding="utf-8") as journal:
