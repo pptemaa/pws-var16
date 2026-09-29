@@ -93,7 +93,7 @@ def main() -> None:
     host, port = protocol.parse_address(__doc__)
     setup_journal()
     with RpcServer((host, port), RpcHandler) as server:
-        print(f"RPC-сервер слушает {host}:{port}, журнал: {JOURNAL_FILE}")
+        print(f"RPC-сервер слушает {host}, порт {port}, журнал {JOURNAL_FILE}")
         try:
             server.serve_forever()
         except KeyboardInterrupt:
