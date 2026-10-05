@@ -7,6 +7,7 @@ dist/
 *.tar.gz
 .venv/
 venv/
+vendor/
 .env
 .pytest_cache/
 .hypothesis/

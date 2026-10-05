@@ -47,19 +47,19 @@ class RpcClient:
             raise error(body.get("message"))
         return body
 
-    def create_agent(self, platform: str, time: int | None = None) -> dict:
+    def create_agent(self, platform: str, time: int | None = None) -> list:
         """Создать запись Agent."""
         return self.call("create_agent", platform=platform, time=time)
 
-    def get_agents(self) -> list[dict]:
+    def get_agents(self) -> list[list]:
         """Получить все записи Agent."""
         return self.call("get_agents")
 
-    def get_agent(self, key: int) -> dict:
+    def get_agent(self, key: int) -> list:
         """Получить запись Agent по идентификатору."""
         return self.call("get_agent", key=key)
 
-    def create_task(self, agent: int, **fields) -> dict:
+    def create_task(self, agent: int, **fields) -> list:
         """Создать запись Task.
 
         Необязательные поля: argument, description, tags, processed,
@@ -67,15 +67,15 @@ class RpcClient:
         """
         return self.call("create_task", agent=agent, **fields)
 
-    def get_tasks(self) -> list[dict]:
+    def get_tasks(self) -> list[list]:
         """Получить все записи Task."""
         return self.call("get_tasks")
 
-    def get_task(self, key: int) -> dict:
+    def get_task(self, key: int) -> list:
         """Получить запись Task по идентификатору."""
         return self.call("get_task", key=key)
 
-    def create_feedback(self, task: int, **fields) -> dict:
+    def create_feedback(self, task: int, **fields) -> list:
         """Создать запись Feedback.
 
         Необязательные поля: result, status, failure, cache_hit,
@@ -83,11 +83,11 @@ class RpcClient:
         """
         return self.call("create_feedback", task=task, **fields)
 
-    def get_feedbacks(self) -> list[dict]:
+    def get_feedbacks(self) -> list[list]:
         """Получить все записи Feedback."""
         return self.call("get_feedbacks")
 
-    def get_feedback(self, key: int) -> dict:
+    def get_feedback(self, key: int) -> list:
         """Получить запись Feedback по идентификатору."""
         return self.call("get_feedback", key=key)
 
@@ -111,7 +111,7 @@ def show(title: str, action) -> None:
 def demo(client: RpcClient) -> None:
     """Продемонстрировать вызов всех функций модели через RPC."""
     agent = client.create_agent("linux")
-    old = client.create_agent("windows", time=agent["time"] - 600)
+    old = client.create_agent("windows", time=agent[1] - 600)
     show("create_agent('linux')", lambda: agent)
     show("create_agent('windows', time=now-10min)", lambda: old)
     show("get_agents()", client.get_agents)
@@ -131,9 +131,6 @@ def demo(client: RpcClient) -> None:
     show("get_agent(100)", lambda: client.get_agent(100))
     show("get_task('1')", lambda: client.get_task("1"))
     show("create_task(100)", lambda: client.create_task(100))
-    show("create_feedback(1, duration='x')",
-         lambda: client.create_feedback(1, duration="x"))
-    show("create_agent(platform=42)", lambda: client.create_agent(42))
     show("create_task(1, color='red')",
          lambda: client.create_task(1, color="red"))
 

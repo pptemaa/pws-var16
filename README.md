@@ -15,8 +15,7 @@
 | `Feedback` | `key`, `time`, `result`, `status`, `failure`, `task`, `cache_hit`, `duration` |
 
 `Task.agent` ссылается на `Agent.key`, `Feedback.task` ссылается на
-`Task.key`. Каждая запись хранится в памяти как именованный кортеж
-(`typing.NamedTuple`). Поле `time` — время в секундах (Unix time); если оно
+`Task.key`. Каждая запись хранится в памяти как обычный кортеж. Поле `time` — время в секундах (Unix time); если оно
 не передано, подставляется текущее время. Ключ `key` выдаётся автоматически.
 
 ## Этап 1. Модель слоя доступа к данным
@@ -120,6 +119,7 @@
 | Демонстрация клиента | `run.bat client [host] [port]` | `./run.sh client [host] [port]` |
 | Тесты | `run.bat test` | `./run.sh test` |
 | Проверка PEP 8 | `run.bat lint` | `./run.sh lint` |
+| MBT и branch-покрытие | `run.bat coverage` | `./run.sh coverage` |
 
 ## Примеры использования
 
@@ -154,10 +154,23 @@ from client import RpcClient
 
 with RpcClient("127.0.0.1", 9016) as rpc:
     agent = rpc.create_agent("linux")
-    rpc.create_task(agent["key"], argument="--fast", description="сборка")
+    rpc.create_task(agent[0], argument="--fast", description="сборка")
     print(rpc.get_recent_agent_tasks())
     # [('linux', '--fast', 'сборка')]
 ```
+
+## Этап 3: MBT
+
+`tests/test_rpc.py` содержит `RpcMachine` на основе
+`hypothesis.stateful.RuleBasedStateMachine`: после каждого сгенерированного
+вызова RPC результат сравнивается с упрощённой моделью в памяти. Машина
+покрывает все 10 методов RPC. Перед запуском установите зависимости:
+
+```
+python -m pip install -r requirements.txt
+```
+
+Команда `coverage` запускает только MBT для RPC и выводит отчёт с ветвями.
 
 ## Структура
 
