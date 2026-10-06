@@ -6,10 +6,8 @@ import model
 
 
 class ModelTests(unittest.TestCase):
-    def setUp(self):
-        model.reset()
-
     def test_records_are_tuples(self):
+        model.reset()
         agent = model.create_agent("linux", 1000)
         task = model.create_task(agent[0], "-v", time=1000)
         feedback = model.create_feedback(task[0], status="done", time=1000)
@@ -18,6 +16,7 @@ class ModelTests(unittest.TestCase):
         self.assertIsInstance(feedback, tuple)
 
     def test_join(self):
+        model.reset()
         agent = model.create_agent("linux", 1000)
         model.create_task(agent[0], "-v", "build", time=1000)
         self.assertEqual(model.get_recent_agent_tasks(1000),
