@@ -170,7 +170,8 @@ with RpcClient("127.0.0.1", 9016) as rpc:
 python -m pip install -r requirements.txt
 ```
 
-Команда `coverage` запускает только MBT для RPC и выводит отчёт с ветвями.
+Команда `coverage` запускает MBT и выводит branch-отчёт именно для
+`src/model.py`, где находятся десять методов, доступных по RPC.
 
 ## Структура
 

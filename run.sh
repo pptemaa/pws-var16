@@ -8,6 +8,6 @@ case "$command" in
     client) python3 src/client.py "$@" ;;
     test) python3 -m unittest discover -s tests -v ;;
     lint) python3 -m flake8 --max-line-length=80 src tests ;;
-    coverage) python3 -m coverage run --branch --source=src -m unittest discover -s tests && python3 -m coverage report -m ;;
+    coverage) python3 -m coverage run --branch --include=src/model.py -m unittest discover -s tests && python3 -m coverage report -m ;;
     *) echo "Usage: ./run.sh repl|server|client|test|lint|coverage" ;;
 esac

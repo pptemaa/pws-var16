@@ -11,7 +11,7 @@ if "%1"=="repl" (
 ) else if "%1"=="lint" (
     python -m flake8 --max-line-length=80 src tests
 ) else if "%1"=="coverage" (
-    python -m coverage run --branch --source=src -m unittest discover -s tests
+    python -m coverage run --branch --include=src/model.py -m unittest discover -s tests
     python -m coverage report -m
 ) else (
     echo Usage: run.bat repl^|server^|client^|test^|lint^|coverage
